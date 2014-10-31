@@ -1,9 +1,9 @@
 package com.bombheadgames.nitrogen2;
 
-import java.awt.Dimension;
-import java.awt.Graphics;
-import java.awt.Image;
-import java.awt.image.MemoryImageSource;
+//import java.awt.Dimension;
+//import java.awt.Graphics;
+//import java.awt.Image;
+//import java.awt.image.MemoryImageSource;
 import java.io.Serializable;
 
 /**
@@ -14,13 +14,12 @@ import java.io.Serializable;
  *
  */
 
-import javax.swing.*;
 // import java.awt.*;  // needed for Dimension class
 // import java.awt.image.MemoryImageSource; // for memory image source
 // import nitrogen1.TexMap;
 // import nitrogen1.Vert;
 
-public class NitrogenContext extends JPanel implements Serializable{
+public class NitrogenContext implements Serializable{
 	private static final long serialVersionUID = -7001666928630703466L;
 
 	public boolean contentGeneratorForcesNoCulling = true;
@@ -213,24 +212,6 @@ public class NitrogenContext extends JPanel implements Serializable{
 
     }    
     
-@Override
-public Dimension getMinimumSize()
-{
-    return new Dimension(w,h);
-}
-
-@Override
-public Dimension getPreferredSize()
-{
-    return new Dimension(w,h);
-}
-
-@Override
-public Dimension getMaximumSize()
-{
-    return new Dimension(w,h);
-}
-
 public void zeroPerformanceCounts()
 {
     itemsRendered = 0;

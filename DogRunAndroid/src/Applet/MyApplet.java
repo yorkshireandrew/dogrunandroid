@@ -11,7 +11,7 @@ package Applet;
  *
  * @author andrew
  */
-/*
+
 
 import java.awt.*;  // needed for Dimension class
 import java.awt.event.ActionEvent;
