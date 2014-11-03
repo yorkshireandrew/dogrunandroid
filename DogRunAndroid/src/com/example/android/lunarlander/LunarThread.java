@@ -6,14 +6,11 @@ import java.io.ObjectInputStream;
 
 
 
-
-
-
-
+import android.content.Context;
 //import Applet.ActionEvent;
 //import Applet.ActionListener;
-import Applet.MyApplet;
-import android.content.Context;
+//import Applet.MyApplet;
+// import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Canvas;
 import android.media.AudioManager;
@@ -23,13 +20,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.view.KeyEvent;
 import android.view.SurfaceHolder;
-
-
-
-
-
-
-
 
 
 //imports from treerun applet
@@ -43,8 +33,9 @@ import com.bombheadgames.nitrogen2.Transform;
 
         private static final int STATE_RUNNING = 0;
 		private static final int STATE_PAUSE = 0;
-		private int mCanvasHeight = 1;
-        private int mCanvasWidth = 1;
+//		private int mCanvasHeight = 1;
+//        private int mCanvasWidth = 1;
+		private Nitrogen2Border nitrogenBorder;
         
         /** Handle to the surface manager object we interact with */
         private SurfaceHolder mSurfaceHolder;
@@ -116,7 +107,7 @@ import com.bombheadgames.nitrogen2.Transform;
         //timer
 //        Timer timer;
 //        final JSlider dogslantSlider;
-        NitrogenContext nitrogenContext = null;
+//        NitrogenContext nitrogenContext = null;
         int currentSpeed;
         RenderableText	avTextField;
         RenderableText	maxTextField;
@@ -191,35 +182,12 @@ import com.bombheadgames.nitrogen2.Transform;
         /** Used to figure out elapsed time between frames */
         private long mLastTime = 0;
 
-        /** Paint to draw the lines on screen. */
-      //  private Paint mLinePaint;
-
-        /** "Bad" speed-too-high variant of the line color. */
-     //   private Paint mLinePaintBad;
-
         /** The state of the game. One of READY, RUNNING, PAUSE, LOSE, or WIN */
         private int mMode;
-
-        /** Currently rotating, -1 left, 0 none, 1 right. */
-     //   private int mRotating;
 
         /** Indicate whether the surface has been created & is ready to draw */
         private boolean mRun = false;
 		private Context mContext;
-
-        /** Scratch rect object. */
-    //    private RectF mScratchRect;
-
-
-
-        /** Number of wins in a row. */
-     //   private int mWinsInARow;
-
-        /** X of lander center. */
-     //   private double mX;
-
-        /** Y of lander center. */
-     //   private double mY;
 
         public LunarThread(SurfaceHolder surfaceHolder, Context context,
                 Handler handler, LunarView lunarview) {
@@ -235,8 +203,8 @@ import com.bombheadgames.nitrogen2.Transform;
             // mLanderImage = context.getResources().getDrawable(R.drawable.lander_plain);
        
             //******************* Treerun stuff **********************
-        	//dogslantSlider = new JSlider(); 
-            nitrogenContext = new NitrogenContext(300,300,1f,1f,0.05f,50000); 	
+        	//dogslantSlider = new JSlider();
+ //           nitrogenContext = new NitrogenContext(300,300,1f,1f,0.05f,50000); 	
             average = 0;
             maximum = 0;
             averageCount = 0;
@@ -245,8 +213,7 @@ import com.bombheadgames.nitrogen2.Transform;
             treerunInit();
             
         }
-        
-        
+          
         public void treerunInit(){
       	   	setName("Tree Run");
       	   	
@@ -306,8 +273,6 @@ import com.bombheadgames.nitrogen2.Transform;
        				0f, .5f, 0f, -120f,
        				0f, 0f, .5f, -120f);
         	
-
-        	
         	dogheadTurn = new Transform(dogheadPosition);
         	dogheadTurn.setUnity();
         	dogheadWaggle = new Transform(dogheadTurn);
@@ -345,9 +310,13 @@ import com.bombheadgames.nitrogen2.Transform;
            	    trees[tree] = treeTransform;
         	}
         	
-        	// create a nitrogen context to render stuff into
-            nitrogenContext.contentGeneratorForcesNoPerspective = false;
-            NitrogenContext.lightingAmbient = 0.4f;
+        	nitrogenBorder = new Nitrogen2Border(1f, 1f, 1f, 0.5f, 50000f);
+        	
+        	// scale to an arbitrary size for now
+        	nitrogenBorder.scaleToScreen(1, 1);
+        	
+        	NitrogenContext nitrogenContext = nitrogenBorder.getNitrogenContext();
+        	setupNitrogenContext(nitrogenContext);
 
         	// ************************************
         	// ************************************
@@ -458,14 +427,13 @@ import com.bombheadgames.nitrogen2.Transform;
         	userInterfaceBox.add(outerControls);
   */      	       
         	
-            getContentPane().add(userInterfaceBox);
-            getContentPane().validate();
-            getContentPane().setVisible(true);
+//            getContentPane().add(userInterfaceBox);
+//            getContentPane().validate();
+//            getContentPane().setVisible(true);
             System.out.println("Rendering");
             nitrogenContext.cls(0xFF0000FF); 
             root.setNeedsTotallyUpdating();
             root.render(nitrogenContext);
-            nitrogenContext.repaint();
             
             currentSpeed = 0;
             timer = new Timer(ANIMATION_DELAY, new TimerHandler());
@@ -476,6 +444,13 @@ import com.bombheadgames.nitrogen2.Transform;
         	//         END OF INIT METHOD
         	// ************************************
         	// ************************************
+        }
+        
+        /** Ensure the nitrogen context is set-up */
+        private void setupNitrogenContext(NitrogenContext nitrogenContext)
+        {
+            nitrogenContext.contentGeneratorForcesNoPerspective = false;
+            NitrogenContext.lightingAmbient = 0.4f;
         }
         
         
@@ -847,8 +822,14 @@ import com.bombheadgames.nitrogen2.Transform;
         }
 
         private void doDraw(Canvas canvas) {
-        	// TODO  Draw stuff in the canvas
-        	canvas.drawBitmap(bitmap, left, top, paint);
+        	// TODO  Draw stuff in the canvas       	
+            System.out.println("Rendering");
+            NitrogenContext nitrogenContext = nitrogenBorder.getNitrogenContext();
+            if (nitrogenContext == null)return;
+            nitrogenContext.cls(0xFF0000FF); 
+            root.setNeedsTotallyUpdating();
+            root.render(nitrogenContext);
+            nitrogenBorder.doDraw(canvas);
         }
 
         /**

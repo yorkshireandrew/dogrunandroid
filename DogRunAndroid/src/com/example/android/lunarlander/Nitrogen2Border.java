@@ -68,15 +68,9 @@ public class Nitrogen2Border {
 		nitrogenContext = new NitrogenContext(nitrogenWidth, nitrogenHeight, xClip, yClip, nearClip, farClip);
 	}
 	
-	
-	
-	void setlightingAmbient(float lightingAmbient){
-		this.lightingAmbient = lightingAmbient;
-		if(nitrogenContext != null){NitrogenContext.lightingAmbient = lightingAmbient;}  
-	}
-	
-	float getLightingAmbient(){
-		if(nitrogenContext != null){return NitrogenContext.lightingAmbient;}else{return this.lightingAmbient;}  
+	public NitrogenContext getNitrogenContext()
+	{
+		return nitrogenContext;
 	}
 	
     /** Draws stuff to the provided Canvas. */
@@ -84,10 +78,7 @@ public class Nitrogen2Border {
     	bitmap.setPixels(this.nitrogenContext.pix, 0, this.nitrogenWidth, 0, 0, this.nitrogenWidth, this.nitrogenHeight);
     	canvas.drawBitmap(bitmap, nitrogenOffset, 0, null);
     }
-	
-	
-	
-	
-	
+    
+    
 
 }

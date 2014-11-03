@@ -72,11 +72,11 @@ public class NitrogenContext implements Serializable{
     /** The z buffer */
     transient public int[] zbuff; 
     
-    /** Image that monitors source */
-    transient Image im; 
+ //   /** Image that monitors source */
+ //   transient Image im; 
     
-    /** A MemoryImageSource that monitors pix */
-    transient MemoryImageSource source;   
+ //   /** A MemoryImageSource that monitors pix */
+ //   transient MemoryImageSource source;   
     
     /** If true only transparent polygons are rendered, otherwise only non-transparent polygons are rendered. Used for double pass rendering where the scene contains transparent polygons */
     public boolean transparencyPass = false;
@@ -107,10 +107,10 @@ public class NitrogenContext implements Serializable{
         zbuff = new int[s];
     	
     	// create an MemoryImageSource bound to the pixel array
-	    source = new MemoryImageSource(w, h, pix, 0, w);
-	    source.setAnimated(true);           // source will be used for multiframe animation
-	    source.setFullBufferUpdates(true);  // source uses a complete buffer of pixels for updates
-	    im = this.createImage(source);  	// this way of creating a BufferedImage avoids calling toolkit which may need permissions     
+//	    source = new MemoryImageSource(w, h, pix, 0, w);
+//	    source.setAnimated(true);           // source will be used for multiframe animation
+//	    source.setFullBufferUpdates(true);  // source uses a complete buffer of pixels for updates
+//	    im = this.createImage(source);  	// this way of creating a BufferedImage avoids calling toolkit which may need permissions     
 	}
     
     /** Constructs a Nitrogen Context to render things into 
@@ -143,18 +143,18 @@ public class NitrogenContext implements Serializable{
         zbuff = new int[s];
 
         // create an MemoryImageSource bound to the pixel array
-        source = new MemoryImageSource(w, h, pix, 0, w);
-        source.setAnimated(true);           // source will be used for multiframe animation
-        source.setFullBufferUpdates(true);  // source uses a complete buffer of pixels for updates
-        im = this.createImage(source);  	// this way of creating a BufferedImage avoids calling toolkit which may need permissions     
+//        source = new MemoryImageSource(w, h, pix, 0, w);
+//        source.setAnimated(true);           // source will be used for multiframe animation
+//        source.setFullBufferUpdates(true);  // source uses a complete buffer of pixels for updates
+//        im = this.createImage(source);  	// this way of creating a BufferedImage avoids calling toolkit which may need permissions     
     }
     
-    @Override
-    public void paintComponent(Graphics g)
-    {
-        source.newPixels();         // causes source to send whole new buffer of pixels to listeners ... im
-        g.drawImage(im,0,0,null);   // draws an image bound to pix in top-lh corner
-    }
+//    @Override
+//    public void paintComponent(Graphics g)
+//    {
+//        source.newPixels();         // causes source to send whole new buffer of pixels to listeners ... im
+//        g.drawImage(im,0,0,null);   // draws an image bound to pix in top-lh corner
+//    }
     
     final public void cls(int col)
     {
