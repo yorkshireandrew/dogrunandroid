@@ -79,7 +79,7 @@ public class TexMap implements Serializable{
     private TexMap(String st, Context context) throws NitrogenCreationException
     { 	
     	String fileName = st;
-    	System.out.println("TexMap (2pram) =" + fileName);
+    	//System.out.println("TexMap (2pram) =" + fileName);
     	Drawable d = AndroidResourceIndex.getDrawable(fileName, context);
     	if(d == null)throw new NitrogenCreationException("TexMap resource " + fileName + " could not be found");
     	Bitmap bitmap = ((BitmapDrawable) d).getBitmap();
@@ -127,7 +127,7 @@ public class TexMap implements Serializable{
        		    return; // we already have loaded the texture
     		}
 //    	URL url = getClass().getResource(resourceName);
-    	System.out.println("TRYING TO LOAD TexMap url:" + resourceName);
+    	//System.out.println("TRYING TO LOAD TexMap url:" + resourceName);
     	Context context = LunarThread.getContext();
     	if(context == null)System.out.println("OH NO NO CONTEXT!");
     	Drawable d = AndroidResourceIndex.getDrawable(resourceName, context);
@@ -138,14 +138,14 @@ public class TexMap implements Serializable{
         tex = new int[h*w];
         bitmap.getPixels(tex, 0, w, 0, 0, w, h);
         resourceName = toUnix(resourceName);
-        System.out.println("" + resourceName + ":" + w + ":" + h);
+        //System.out.println("" + resourceName + ":" + w + ":" + h);
         
-        String blah = "";
-        for(int x = 0; x < w; x++)
-        {
-        	blah += Integer.toHexString(tex[x]) + ",";
-        }
-        System.out.println(blah);
+//        String blah = "";
+//       for(int x = 0; x < w; x++)
+//        {
+//        	blah += Integer.toHexString(tex[x]) + ",";
+//        }
+//        System.out.println(blah);
         
         textures.put(resourceName, this);
     }

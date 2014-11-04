@@ -37,7 +37,7 @@ public class AndroidResourceIndex {
 	
 	public static Drawable getDrawable(String path, Context context)
 	{
-		System.out.println("ARI getDrawable:" + path);
+		//System.out.println("ARI getDrawable:" + path);
 		int i = resourceMap.get(path);
 		Resources r = context.getResources();
 		return r.getDrawable(i);
@@ -45,11 +45,11 @@ public class AndroidResourceIndex {
 	
 	public static InputStream getInputStream(String path, Context context)
 	{
-		System.out.println("ARI getInputStream:" + path);
-		if (resourceMap == null)System.out.println("ARI WOT NO RESOURCE MAP!");
+		//System.out.println("ARI getInputStream:" + path);
+		//if (resourceMap == null)System.out.println("ARI WOT NO RESOURCE MAP!");
 		int i = resourceMap.get(path);
 		Resources r = context.getResources();
-		if (r == null)System.out.println("WOT NO RESOURCES");
+		//if (r == null)System.out.println("WOT NO RESOURCES");
 		return r.openRawResource(i);
 	}
 

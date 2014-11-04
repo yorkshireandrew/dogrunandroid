@@ -30,10 +30,15 @@ import android.os.Handler;
 import android.os.Message;
 import android.util.AttributeSet;
 import android.view.KeyEvent;
+import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
+import android.view.View.OnTouchListener;
 import android.widget.TextView;
+
+
+
 
 // imports from treerun applet
 import com.bombheadgames.nitrogen2.Item;
@@ -52,7 +57,7 @@ import com.bombheadgames.nitrogen2.Transform;
  * by the system.
  */
 @SuppressLint("HandlerLeak")
-class LunarView extends SurfaceView implements SurfaceHolder.Callback {
+class LunarView extends SurfaceView implements SurfaceHolder.Callback, OnTouchListener {
     public Handler mHandler;
 
     /** Handle to the application context, used to e.g. fetch Drawables. */
@@ -91,22 +96,23 @@ class LunarView extends SurfaceView implements SurfaceHolder.Callback {
         return thread;
     }
 
-    /**
-     * Standard override to get key-press events.
-     */
-    @Override
-    public boolean onKeyDown(int keyCode, KeyEvent msg) {
-        return thread.doKeyDown(keyCode, msg);
-    }
+//    @Override
+//    public boolean onKeyDown(int keyCode, KeyEvent msg) {
+//        return thread.doKeyDown(keyCode, msg);
+//    }
 
-    /**
-     * Standard override for key-up. We actually care about these, so we can
-     * turn off the engine or stop rotating.
-     */
-    @Override
-    public boolean onKeyUp(int keyCode, KeyEvent msg) {
-        return thread.doKeyUp(keyCode, msg);
-    }
+
+//    @Override
+//    public boolean onKeyUp(int keyCode, KeyEvent msg) {
+//        return thread.doKeyUp(keyCode, msg);
+//    }
+    
+	@Override
+	public boolean onTouch(View arg0, MotionEvent event) {
+		System.out.println("VIEW TOUCHED");
+		//thread.onTouch(arg0, event);
+		return true;
+	}
 
     /**
      * Standard window-focus override. Notice focus lost so we can pause on
@@ -138,7 +144,7 @@ class LunarView extends SurfaceView implements SurfaceHolder.Callback {
         // start the thread here so that we don't busy-wait in run()
         // waiting for the surface to be created
         thread.setRunning(true);
-        thread.start();
+//        thread.start();
     }
 
     /*

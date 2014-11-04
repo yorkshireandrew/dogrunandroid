@@ -7,6 +7,7 @@ import java.io.ObjectInputStream;
 
 
 
+
 import android.content.Context;
 //import Applet.ActionEvent;
 //import Applet.ActionListener;
@@ -20,9 +21,12 @@ import android.media.SoundPool;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.KeyEvent;
+import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 
 
+
+import android.view.View;
 
 import com.bombheadgames.nitrogen2.AndroidResourceIndex;
 //imports from treerun applet
@@ -33,7 +37,7 @@ import com.bombheadgames.nitrogen2.SharedImmutableSubItem;
 import com.bombheadgames.nitrogen2.Transform;
 
 	public class LunarThread extends Thread implements AnimationTimerListener{
-		private static final int LEAN_RATE = 450;
+		private static final int LEAN_RATE = 45;
 		
         private static final int STATE_RUNNING = 1;
 		private static final int STATE_PAUSE = 2;
@@ -311,7 +315,7 @@ import com.bombheadgames.nitrogen2.Transform;
             root.render(nitrogenContext);
             
             currentSpeed = 0;
-            timer = new AnimationTimer(20, 2000);
+            timer = new AnimationTimer(2000, 2000);
             timer.addListener(this);
             
         	// ************************************
@@ -333,7 +337,7 @@ import com.bombheadgames.nitrogen2.Transform;
         {
         	ObjectInputStream source = null;
         	try{
-        		System.out.println("loadSISI resource:" + resource);
+        		//System.out.println("loadSISI resource:" + resource);
         		
         		source = new ObjectInputStream(AndroidResourceIndex.getInputStream(resource, mContext));
         		return ((SharedImmutableSubItem) source.readObject());
@@ -565,6 +569,10 @@ import com.bombheadgames.nitrogen2.Transform;
                         mRotating  = -1;
                         return true;
                 }
+                if (keyCode == KeyEvent.KEYCODE_DPAD_CENTER) {
+                    mRotating  = 0;
+                    return true;
+            }
                 if (keyCode == KeyEvent.KEYCODE_DPAD_RIGHT || keyCode == KeyEvent.KEYCODE_W)
                 {
                         mRotating = 1;
@@ -581,11 +589,7 @@ import com.bombheadgames.nitrogen2.Transform;
 
             synchronized (mSurfaceHolder) {
                 if (mMode == STATE_RUNNING) {
-                    if (keyCode == KeyEvent.KEYCODE_DPAD_CENTER)
-                    {
-                    	mRotating = 0;
-                        handled = true;
-                    }
+                	mRotating = 0;
                 }
             }
 
@@ -593,17 +597,18 @@ import com.bombheadgames.nitrogen2.Transform;
         }
 
         private void doDraw(Canvas canvas) {    	
-            System.out.println("Rendering");
+            //System.out.println("Rendering");
             NitrogenContext nitrogenContext = nitrogenBorder.getNitrogenContext();
             if (nitrogenContext == null)return;
+            if (nitrogenContext.w < 10)return;
 			if(currentSpeed < 10)
 			{
-				nitrogenContext.cls(0xFFFFFFFF);
+				nitrogenContext.cls(0xFF0000FF);
 			}
 			else
 			{
-				//nitrogenContext.cls(0xFF0000FF);
-				nitrogenContext.cls(0xFFA47D4C);
+				nitrogenContext.cls(0xFF0000FF);
+				//nitrogenContext.cls(0xFFA47D4C);
 				root.render(nitrogenContext);				
 			}
 			nitrogenBorder.doDraw(canvas);		         
@@ -618,7 +623,7 @@ import com.bombheadgames.nitrogen2.Transform;
 
 			int treeCount = LunarThread.TREE_COUNT;
 			Transform[] trees = LunarThread.this.trees;
-			
+			//System.out.println("elapsed:" + elapsed);
 			// rotate the dog
 			if(mRotating == 1)
 			{
@@ -629,6 +634,12 @@ import com.bombheadgames.nitrogen2.Transform;
 			{
 				mRotation -= (LEAN_RATE * elapsed)/1000;
 				if (mRotation < -450)mRotation = -450;
+			}
+			
+			if(mRotating != 0)
+			{
+				dogslant.setRoll(mRotation);
+				dogslant.setNeedsRotationUpdating();
 			}
 			
 			
@@ -701,9 +712,9 @@ import com.bombheadgames.nitrogen2.Transform;
 	        if(averageCount == 5)
 	        {
 	        	average = average/5;
-	        	avTextField.setText(Integer.toString(average));
+//	        	avTextField.setText(Integer.toString(average));
 //	        	avTextField.repaint();
-	        	maxTextField.setText(Integer.toString(maximum));
+//	        	maxTextField.setText(Integer.toString(maximum));
 //	        	maxTextField.repaint();
 	        	maximum = 0;
 	        	averageCount = 0;
@@ -718,5 +729,30 @@ import com.bombheadgames.nitrogen2.Transform;
     	public static Context getContext()
     	{
     		return mContext;
+    	}
+    	
+    	boolean onTouch(View arg0, MotionEvent event) {
+    		System.out.println("TOUCHED");
+    		if(event.getAction() == MotionEvent.ACTION_DOWN)
+    		{
+    			int xpos = (int)event.getX();
+    			if(nitrogenBorder != null)
+    			{
+    				if(xpos > (nitrogenBorder.screenWidth/2))
+    				{
+    					mRotating = 1;
+    				}
+    				else
+    				{
+    					mRotating = -1;
+    				}
+    			}
+    		}
+    		
+    		if(event.getAction() == MotionEvent.ACTION_UP)
+    		{
+    			mRotating = 0;
+    		}
+    		return true;
     	}
     }

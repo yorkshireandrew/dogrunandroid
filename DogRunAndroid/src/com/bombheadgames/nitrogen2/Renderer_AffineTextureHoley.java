@@ -332,6 +332,7 @@ private final void renderLine(
 		// ***************** RENDER PIXEL ****************
 		int pixelZ = (int)(bigLeftSZ >> ZSHIFT);
 		int index = indexOffset + lineStart;
+		//return;
 		
 		if(pixelZ > contextZBuffer[index])
 		{
@@ -350,6 +351,7 @@ private final void renderLine(
 		
 		lineStart++;
 		lineLength--;	
+		
 	}
 }
 

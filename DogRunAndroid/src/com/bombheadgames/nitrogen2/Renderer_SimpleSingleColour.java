@@ -247,7 +247,8 @@ private final void renderLine(
 		// ***************** RENDER PIXEL ****************
 		int pixelZ = (int)(bigLeftSZ >> ZSHIFT);
 		int index = indexOffset + lineStart;
-		
+		//debug
+		if((index >= contextZBuffer.length) ||(index < 0))return;
 		if(pixelZ > contextZBuffer[index])
 		{
 			contextZBuffer[index] = pixelZ;

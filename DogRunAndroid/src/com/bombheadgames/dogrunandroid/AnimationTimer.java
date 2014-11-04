@@ -36,7 +36,8 @@ public class AnimationTimer {
 				for(AnimationTimerListener listener : listeners)
 				{
 					listener.animationTimerNotify(delta);
-				}				
+				}
+				lastTime = now;
 			}
 		}
 		else
