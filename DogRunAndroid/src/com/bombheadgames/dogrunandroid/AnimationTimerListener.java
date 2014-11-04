@@ -1,4 +1,4 @@
-package com.example.android.lunarlander;
+package com.bombheadgames.dogrunandroid;
 
 public interface AnimationTimerListener {
 

@@ -1,4 +1,4 @@
-package com.example.android.lunarlander;
+package com.bombheadgames.dogrunandroid;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -77,4 +77,13 @@ public class AnimationTimer {
 		}
 	}
 	
+	void addListener(AnimationTimerListener listener)
+	{
+		listeners.add(listener);
+	}
+	
+	void removeListener(AnimationTimerListener listener)
+	{
+		listeners.remove(listener);
+	}
 }

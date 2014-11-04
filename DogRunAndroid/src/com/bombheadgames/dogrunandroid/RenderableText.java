@@ -1,4 +1,4 @@
-package com.bombhead.spaceinvaders2;
+package com.bombheadgames.dogrunandroid;
 
 import android.graphics.Canvas;
 import android.graphics.Paint;

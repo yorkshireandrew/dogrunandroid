@@ -1,4 +1,4 @@
-package com.example.android.lunarlander;
+package com.bombheadgames.dogrunandroid;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -29,12 +29,18 @@ import com.bombheadgames.nitrogen2.NitrogenContext;
 import com.bombheadgames.nitrogen2.SharedImmutableSubItem;
 import com.bombheadgames.nitrogen2.Transform;
 
-	class LunarThread extends Thread {
-
-        private static final int STATE_RUNNING = 0;
-		private static final int STATE_PAUSE = 0;
-//		private int mCanvasHeight = 1;
-//        private int mCanvasWidth = 1;
+	class LunarThread extends Thread implements AnimationTimerListener{
+		private static final int LEAN_RATE = 450;
+		
+        private static final int STATE_RUNNING = 1;
+		private static final int STATE_PAUSE = 2;
+		public static final int STATE_READY = 3;
+		public static final int STATE_LOSE = 4;
+		
+		public static final int DIFFICULTY_EASY = 5;
+		public static final int DIFFICULTY_MEDIUM = 6;
+		public static final int DIFFICULTY_HARD = 7;	
+		
 		private Nitrogen2Border nitrogenBorder;
         
         /** Handle to the surface manager object we interact with */
@@ -73,6 +79,8 @@ import com.bombheadgames.nitrogen2.Transform;
         
         static final int CRASH_MAX = 4;
 
+
+
         Transform root;
           
         // transforms for orientation
@@ -93,8 +101,8 @@ import com.bombheadgames.nitrogen2.Transform;
         Transform	dogheadWaggle;
         Transform	dogheadLeftEar;
         Transform	dogheadRightEar;
-        int dogrot = 0;
-        int dogwaggle = 0;
+        int 		dogrot = 0;
+        int 		dogwaggle = 0;
         
         // tree SISI
         SharedImmutableSubItem treeSISI;
@@ -104,10 +112,6 @@ import com.bombheadgames.nitrogen2.Transform;
         SharedImmutableSubItem dogheadLeftEarSISI;
         SharedImmutableSubItem dogheadRightEarSISI;
         
-        //timer
-//        Timer timer;
-//        final JSlider dogslantSlider;
-//        NitrogenContext nitrogenContext = null;
         int currentSpeed;
         RenderableText	avTextField;
         RenderableText	maxTextField;
@@ -120,67 +124,8 @@ import com.bombheadgames.nitrogen2.Transform;
         SoundPool sp = new SoundPool(4, AudioManager.STREAM_MUSIC, 0);
         MediaPlayer[] crashes;
         MediaPlayer currentSound;
-
         
-//        int[] crashes;
-//        int currentSound;
-
-        /** What to draw for the Lander when it has crashed */
-       // private Drawable mCrashedImage;
-
-        /**
-         * Current difficulty -- amount of fuel, allowed angle, etc. Default is
-         * MEDIUM.
-         */
-        //private int mDifficulty;
-
-        /** Velocity dx. */
-       // private double mDX;
-
-        /** Velocity dy. */
-        //private double mDY;
-
-        /** Is the engine burning? */
-      //  private boolean mEngineFiring;
-
-        /** What to draw for the Lander when the engine is firing */
-       // private Drawable mFiringImage;
-
-        /** Fuel remaining */
-      //  private double mFuel;
-
-        /** Allowed angle. */
-       // private int mGoalAngle;
-
-        /** Allowed speed. */
-       // private int mGoalSpeed;
-
-        /** Width of the landing pad. */
-      //  private int mGoalWidth;
-
-        /** X of the landing pad. */
-      //  private int mGoalX;
-
-        /** Message handler used by thread to interact with TextView */
-      //  private Handler mHandler;
-
-        /**
-         * Lander heading in degrees, with 0 up, 90 right. Kept in the range
-         * 0..360.
-         */
-       // private double mHeading;
-
-        /** Pixel height of lander image. */
-     //   private int mLanderHeight;
-
-        /** What to draw for the Lander in its normal state */
-     //   private Drawable mLanderImage;
-
-        /** Pixel width of lander image. */
-     //   private int mLanderWidth;
-
-        /** Used to figure out elapsed time between frames */
-        private long mLastTime = 0;
+        AnimationTimer timer;
 
         /** The state of the game. One of READY, RUNNING, PAUSE, LOSE, or WIN */
         private int mMode;
@@ -188,6 +133,10 @@ import com.bombheadgames.nitrogen2.Transform;
         /** Indicate whether the surface has been created & is ready to draw */
         private boolean mRun = false;
 		private Context mContext;
+		private int mRotating = 0;
+		private int mRotation = 0;
+
+		private int hardness = DIFFICULTY_MEDIUM;
 
         public LunarThread(SurfaceHolder surfaceHolder, Context context,
                 Handler handler, LunarView lunarview) {
@@ -231,12 +180,8 @@ import com.bombheadgames.nitrogen2.Transform;
 //            crashes[1] = MediaPlayer.create(mContext, R.raw.crash2);
 //            crashes[2] = MediaPlayer.create(mContext, R.raw.crash3);
 //            crashes[3] = MediaPlayer.create(mContext, R.raw.crash4);
-      	    try {
-    			Thread.sleep(2000);
-    		} catch (InterruptedException e1) {
-    			// TODO Auto-generated catch block
-    			e1.printStackTrace();
-    		}
+
+      	    
       	   	
       	   	root = new Transform(
       			null,
@@ -369,75 +314,15 @@ import com.bombheadgames.nitrogen2.Transform;
     		Item rightEarItem 	= Item.createItem(dogheadRightEarSISI, dogheadRightEar);
     		rightEarItem.setVisibility(true);
     		dogheadRightEar.setNeedsTotallyUpdating();
-/*
-        	dogslantSlider.setModel(new DefaultBoundedRangeModel(0,1,-450,450));
-        	dogslantSlider.setMinorTickSpacing(450);
-        	dogslantSlider.setPaintTicks(true);
-        	dogslantSlider.addChangeListener(
-        			new ChangeListener()
-        			{
 
-    					@Override
-    					public void stateChanged(ChangeEvent arg0) {
-    						dogslant.setRoll(dogslantSlider.getModel().getValue());
-//    				        nitrogenContext.cls(0xFF0000FF);  
-//    				        root.setNeedsTotallyUpdating();
-//    				        root.render(nitrogenContext);
-//    				        nitrogenContext.repaint();		
-    					}			
-        			}
-        	);
-        	Box dogslantSliderBox = Box.createHorizontalBox();
-        	dogslantSliderBox.add(new FixedWidthLabel("DOG SLANT", LABEL_WIDTH));
-        	dogslantSliderBox.add(dogslantSlider);
-        	dogslantSliderBox.add(Box.createHorizontalGlue());
-        		
-        	// ************************************
-        	// ************************************
-        	//         CREATE USER INTERFACE
-        	// ************************************
-        	// ************************************
-        	
-        	Box controls = Box.createVerticalBox();
-        	controls.add(dogslantSliderBox);
-        	
-            avTextField = new JTextField();
-            maxTextField = new JTextField();
-            
-            Box avBox = Box.createHorizontalBox();
-            avBox.add(new JLabel("Average"));
-            avBox.add(avTextField);
-            avBox.add(Box.createHorizontalGlue());
-            Box maxBox = Box.createHorizontalBox();
-            
-            maxBox.add(new JLabel("Max"));
-            maxBox.add(maxTextField);
-            maxBox.add(Box.createHorizontalGlue());
-     //       controls.add(avBox);
-     //       controls.add(maxBox);
-        	
-        	Box outerControls = Box.createHorizontalBox();
-        	outerControls.add(Box.createHorizontalGlue());
-        	outerControls.add(controls);
-        	outerControls.add(Box.createHorizontalGlue());
-        	
-        	Box userInterfaceBox = Box.createVerticalBox();
-        	userInterfaceBox.add(nitrogenContext);
-        	userInterfaceBox.add(Box.createVerticalStrut(5));
-        	userInterfaceBox.add(outerControls);
-  */      	       
-        	
-//            getContentPane().add(userInterfaceBox);
-//            getContentPane().validate();
-//            getContentPane().setVisible(true);
             System.out.println("Rendering");
             nitrogenContext.cls(0xFF0000FF); 
             root.setNeedsTotallyUpdating();
             root.render(nitrogenContext);
             
             currentSpeed = 0;
-            timer = new Timer(ANIMATION_DELAY, new TimerHandler());
-            timer.start();
+            timer = new AnimationTimer(20, 2000);
+            timer.addListener(this);
             
         	// ************************************
         	// ************************************
@@ -510,101 +395,6 @@ import com.bombheadgames.nitrogen2.Transform;
         	}
         }
         
-        
-        private class TimerHandler implements ActionListener
-        {
-
-    		@Override
-    		public void actionPerformed(ActionEvent e) {
-    			int treeCount = LunarThread.TREE_COUNT;
-    			Transform[] trees = LunarThread.this.trees;
-    			int side = LunarThread.this.dogslantSlider.getModel().getValue();
-    			side = (-side * LunarThread.SIDEWAYS_SPEED)/450;
-    			boolean crash = false;
-    			long starttime = System.currentTimeMillis();
-    			for(int tree = 0; tree < treeCount; tree++)
-    			{
-    				Transform treeTrans = trees[tree];
-    				treeTrans.a34 += currentSpeed;
-    				treeTrans.a14 += side;
-    				if(treeTrans.a34 > 0){
-    					if((treeTrans.a14 > -LunarThread.FATNESS)&&(treeTrans.a14 < LunarThread.FATNESS))crash = true;
-    					treeTrans.a34 = LunarThread.TREE_ZMAX;
-    					treeTrans.a14 =(int)(((double)TREE_XMAX) * (Math.random() - Math.random()));
-    				}
-//    				treeTrans.setNeedsTranslationUpdating();
-    				treeTrans.setNeedsTotallyUpdating();
-    			}
-    			
-    			Transform groundT = ground;
-    			groundT.a14 += side;
-    			if(groundT.a14 > 2000)groundT.a14 -= 2000;
-    			if(groundT.a14 < -2000)groundT.a14 += 2000;
-    			groundT.a34 += currentSpeed;
-    			if(groundT.a34 > -6000)groundT.a34 -= 2000;
-    			groundT.setNeedsTranslationUpdating();
-    			
-    			int headturn = LunarThread.this.dogslantSlider.getModel().getValue();
-    			headturn = (headturn * MyApplet.DOGTURN_EXTENT) / 450;
-    			dogheadTurn.setTurn(-900 + headturn);
-    			dogrot += 100;
-    			if(dogrot > 1700)dogrot = -1700;
-    			dogheadTurn.setNeedsTotallyUpdating();
-    			
-    			dogwaggle += 1;
-    			if(dogwaggle == LunarThread.DOGWAG_ARRAY_LENGTH)dogwaggle = 0;
-    			dogheadWaggle.setRoll(LunarThread.DOGWAG_ARRAY[dogwaggle]);
-    			dogheadWaggle.setNeedsRotationUpdating();
-    			
-    			dogheadLeftEar.setRoll(LunarThread.EARWAG_ARRAY[dogwaggle]);
-    			dogheadLeftEar.setNeedsRotationUpdating();
-    			dogheadRightEar.setRoll(-LunarThread.EARWAG_ARRAY[dogwaggle]);
-    			dogheadRightEar.setNeedsRotationUpdating();
-    			
-    			
-    			if(crash)
-    			{
-    				currentSpeed = 0;
-    				if(currentSound != null)currentSound.stop();
-    				currentSound = crashes[crashcount];
-    				currentSound.play();
-    				crashcount++;
-    				if(crashcount >= CRASH_MAX)crashcount = CRASH_MAX - 1;
-    				
-    			}
-    			if(currentSpeed < 10)
-    			{
-    				currentSpeed++;
-    				nitrogenContext.cls(0xFFFFFFFF);
-    			}
-    			else
-    			{
-    				if(currentSpeed < MyApplet.SPEED)currentSpeed++;
-    				nitrogenContext.cls(0xFF0000FF);
-    				nitrogenContext.cls(0xFFA47D4C);
-    				LunarThread.this.root.render(nitrogenContext);				
-    			}
-    			
-    	        nitrogenContext.repaint();
-    	        long endtime = System.currentTimeMillis();
-    	        int time = (int)(endtime - starttime);
-    	        average += time;
-    	        if(time > maximum)maximum = time;
-    	        
-    	        averageCount++;
-    	        if(averageCount == 5)
-    	        {
-    	        	average = average/5;
-    	        	avTextField.setText(Integer.toString(average));
-    	        	avTextField.repaint();
-    	        	maxTextField.setText(Integer.toString(maximum));
-    	        	maxTextField.repaint();
-    	        	maximum = 0;
-    	        	averageCount = 0;
-    	        }
-    		}	
-        }
-
         /**
          * Starts the game, setting parameters for the current difficulty.
          */
@@ -644,8 +434,10 @@ import com.bombheadgames.nitrogen2.Transform;
                 try {
                     c = mSurfaceHolder.lockCanvas(null);
                     synchronized (mSurfaceHolder) {
-                        if (mMode == STATE_RUNNING) updatePhysics();
+                        if (mMode == STATE_RUNNING) 
+                        	timer.process();
                         doDraw(c);
+                        timer.pad();
                     }
                 } finally {
                     // do this in a finally so that if an exception is thrown
@@ -657,6 +449,13 @@ import com.bombheadgames.nitrogen2.Transform;
                 }
             }
         }
+        
+        @Override
+        public void animationTimerNotify(long interval)
+        {
+        	updatePhysics(interval);
+        }
+
 
         /**
          * Dump game state to the provided Bundle. Typically called when the
@@ -734,9 +533,7 @@ import com.bombheadgames.nitrogen2.Transform;
         public void setSurfaceSize(int width, int height) {
             // synchronized to make sure these all change atomically
             synchronized (mSurfaceHolder) {
-                mCanvasWidth = width;
-                mCanvasHeight = height;
-                // TODO create suitable nitrogen screen 
+            	nitrogenBorder.scaleToScreen(width, height);
             }
         }
 
@@ -746,65 +543,44 @@ import com.bombheadgames.nitrogen2.Transform;
         public void unpause() {
             // Move the real time clock up to now
             synchronized (mSurfaceHolder) {
-//                mLastTime = System.currentTimeMillis() + 100;
+            	if(timer != null)
+            	{
+            		timer.resume();
+            	}
             }
             setState(STATE_RUNNING);
         }
 
+        /** Handle key down */
         boolean doKeyDown(int keyCode, KeyEvent msg) {
             synchronized (mSurfaceHolder) {
-            	/*
+            	
                 boolean okStart = false;
                 if (keyCode == KeyEvent.KEYCODE_DPAD_UP) okStart = true;
                 if (keyCode == KeyEvent.KEYCODE_DPAD_DOWN) okStart = true;
                 if (keyCode == KeyEvent.KEYCODE_S) okStart = true;
 
-                boolean center = (keyCode == KeyEvent.KEYCODE_DPAD_UP);
-
-                if (okStart
-                        && (mMode == STATE_READY || mMode == STATE_LOSE || mMode == STATE_WIN)) {
-                    // ready-to-start -> start
-                    doStart();
-                    return true;
-                } else if (mMode == STATE_PAUSE && okStart) {
-                    // paused -> running
-                    unpause();
-                    return true;
-                } else if (mMode == STATE_RUNNING) {
-                    // center/space -> fire
-                    if (keyCode == KeyEvent.KEYCODE_DPAD_CENTER
-                            || keyCode == KeyEvent.KEYCODE_SPACE) {
-                        setFiring(true);
+                if (okStart && (mMode != STATE_RUNNING))
+                {
+                	doStart();
+                	return true;
+                }
+                
+                if (keyCode == KeyEvent.KEYCODE_DPAD_LEFT || keyCode == KeyEvent.KEYCODE_Q) {
+                        mRotating  = -1;
                         return true;
-                        // left/q -> left
-                    } else if (keyCode == KeyEvent.KEYCODE_DPAD_LEFT
-                            || keyCode == KeyEvent.KEYCODE_Q) {
-                        mRotating = -1;
-                        return true;
-                        // right/w -> right
-                    } else if (keyCode == KeyEvent.KEYCODE_DPAD_RIGHT
-                            || keyCode == KeyEvent.KEYCODE_W) {
+                }
+                if (keyCode == KeyEvent.KEYCODE_DPAD_RIGHT || keyCode == KeyEvent.KEYCODE_W)
+                {
                         mRotating = 1;
                         return true;
-                        // up -> pause
-                    } else if (keyCode == KeyEvent.KEYCODE_DPAD_UP) {
-                        pause();
-                        return true;
-                    }
                 }
-                */
                 return false;
             }
             
         }
 
-        /**
-         * Handles a key-up event.
-         * 
-         * @param keyCode the key that was pressed
-         * @param msg the original event object
-         * @return true if the key was handled and consumed, or else false
-         */
+        /** Handle key up */
         boolean doKeyUp(int keyCode, KeyEvent msg) {
             boolean handled = false;
 
@@ -812,7 +588,7 @@ import com.bombheadgames.nitrogen2.Transform;
                 if (mMode == STATE_RUNNING) {
                     if (keyCode == KeyEvent.KEYCODE_DPAD_CENTER)
                     {
-                    	// handle key up
+                    	mRotating = 0;
                         handled = true;
                     }
                 }
@@ -821,15 +597,21 @@ import com.bombheadgames.nitrogen2.Transform;
             return handled;
         }
 
-        private void doDraw(Canvas canvas) {
-        	// TODO  Draw stuff in the canvas       	
+        private void doDraw(Canvas canvas) {    	
             System.out.println("Rendering");
             NitrogenContext nitrogenContext = nitrogenBorder.getNitrogenContext();
             if (nitrogenContext == null)return;
-            nitrogenContext.cls(0xFF0000FF); 
-            root.setNeedsTotallyUpdating();
-            root.render(nitrogenContext);
-            nitrogenBorder.doDraw(canvas);
+			if(currentSpeed < 10)
+			{
+				nitrogenContext.cls(0xFFFFFFFF);
+			}
+			else
+			{
+				//nitrogenContext.cls(0xFF0000FF);
+				nitrogenContext.cls(0xFFA47D4C);
+				root.render(nitrogenContext);				
+			}
+			nitrogenBorder.doDraw(canvas);		         
         }
 
         /**
@@ -837,16 +619,104 @@ import com.bombheadgames.nitrogen2.Transform;
          * realtime. Does not invalidate(). Called at the start of draw().
          * Detects the end-of-game and sets the UI to the next state.
          */
-        private void updatePhysics() {
-            long now = System.currentTimeMillis();
+        private void updatePhysics(long elapsed) {
 
-            // Do nothing if mLastTime is in the future.
-            // This allows the game-start to delay the start of the physics
-            // by 100ms or whatever.
-            if (mLastTime > now) return;
+			int treeCount = LunarThread.TREE_COUNT;
+			Transform[] trees = LunarThread.this.trees;
+			
+			// rotate the dog
+			if(mRotating == 1)
+			{
+				mRotation += (LEAN_RATE * elapsed)/1000;
+				if (mRotation > 450)mRotation = 450;
+			}
+			if(mRotating ==-1)
+			{
+				mRotation -= (LEAN_RATE * elapsed)/1000;
+				if (mRotation < -450)mRotation = -450;
+			}
+			
+			
+			int side = mRotation;
+			side = (-side * LunarThread.SIDEWAYS_SPEED)/450;
+			boolean crash = false;
+			long starttime = System.currentTimeMillis();
+			for(int tree = 0; tree < treeCount; tree++)
+			{
+				Transform treeTrans = trees[tree];
+				treeTrans.a34 += currentSpeed;
+				treeTrans.a14 += side;
+				if(treeTrans.a34 > 0){
+					if((treeTrans.a14 > -LunarThread.FATNESS)&&(treeTrans.a14 < LunarThread.FATNESS))crash = true;
+					treeTrans.a34 = LunarThread.TREE_ZMAX;
+					treeTrans.a14 =(int)(((double)TREE_XMAX) * (Math.random() - Math.random()));
+				}
+//				treeTrans.setNeedsTranslationUpdating();
+				treeTrans.setNeedsTotallyUpdating();
+			}
+			
+			Transform groundT = ground;
+			groundT.a14 += side;
+			if(groundT.a14 > 2000)groundT.a14 -= 2000;
+			if(groundT.a14 < -2000)groundT.a14 += 2000;
+			groundT.a34 += currentSpeed;
+			if(groundT.a34 > -6000)groundT.a34 -= 2000;
+			groundT.setNeedsTranslationUpdating();
+			
+			int headturn = mRotation;
+			headturn = (headturn * DOGTURN_EXTENT) / 450;
+			dogheadTurn.setTurn(-900 + headturn);
+			dogrot += 100;
+			if(dogrot > 1700)dogrot = -1700;
+			dogheadTurn.setNeedsTotallyUpdating();
+			
+			dogwaggle += 1;
+			if(dogwaggle == LunarThread.DOGWAG_ARRAY_LENGTH)dogwaggle = 0;
+			dogheadWaggle.setRoll(LunarThread.DOGWAG_ARRAY[dogwaggle]);
+			dogheadWaggle.setNeedsRotationUpdating();
+			
+			dogheadLeftEar.setRoll(LunarThread.EARWAG_ARRAY[dogwaggle]);
+			dogheadLeftEar.setNeedsRotationUpdating();
+			dogheadRightEar.setRoll(-LunarThread.EARWAG_ARRAY[dogwaggle]);
+			dogheadRightEar.setNeedsRotationUpdating();
+			
+			
+			if(crash)
+			{
+				currentSpeed = 0;
+				if(currentSound != null)currentSound.stop();
+				currentSound = crashes[crashcount];
+				//currentSound.play();
+				crashcount++;
+				if(crashcount >= CRASH_MAX)crashcount = CRASH_MAX - 1;
+				
+			}
+			
+			if(currentSpeed < 10)
+			{
+				currentSpeed++;
+			}
 
-            double elapsed = (now - mLastTime) / 1000.0;
-
-            //TODO update physics
+	        long endtime = System.currentTimeMillis();
+	        int time = (int)(endtime - starttime);
+	        average += time;
+	        if(time > maximum)maximum = time;
+	        
+	        averageCount++;
+	        if(averageCount == 5)
+	        {
+	        	average = average/5;
+	        	avTextField.setText(Integer.toString(average));
+//	        	avTextField.repaint();
+	        	maxTextField.setText(Integer.toString(maximum));
+//	        	maxTextField.repaint();
+	        	maximum = 0;
+	        	averageCount = 0;
+	        }
         }
+        
+    	public void setDifficulty(final int difficulty)
+    	{
+    		hardness  = difficulty;
+    	}
     }

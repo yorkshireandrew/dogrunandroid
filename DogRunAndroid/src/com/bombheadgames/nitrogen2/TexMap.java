@@ -10,10 +10,10 @@ package com.bombheadgames.nitrogen2;
  * @author andrew
  */
 
-import java.awt.Graphics2D;
-import java.awt.Image;
+//import java.awt.Graphics2D;
+//import java.awt.Image;
 //import java.awt.Component;
-import java.awt.image.BufferedImage;
+//import java.awt.image.BufferedImage;
 
 import java.io.File;
 import java.io.IOException;
@@ -22,6 +22,10 @@ import java.io.Serializable;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
+
+import android.graphics.Bitmap;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.BitmapDrawable;
 
 public class TexMap implements Serializable{
 	private static final long serialVersionUID = 3915774142992302906L;
@@ -45,38 +49,47 @@ public class TexMap implements Serializable{
     	return(new TexMap(st));
     }
 
+
     /** altered constructor that reads files rather than embedded resources (but acts as though it was from a resource if serialised to disk)*/
+ /*
     public TexMap(String resourcePathx, String filex) throws NitrogenCreationException
     { 	
     	String fileName = resourcePathx + filex;
-    	File f = new File(fileName);
-        if(!f.exists())throw new NitrogenCreationException("TexMap resource " + fileName + " could not be found");
-    	Image ii = new javax.swing.ImageIcon(fileName).getImage();
-        BufferedImage i = new BufferedImage(ii.getWidth(null),ii.getHeight(null),BufferedImage.TYPE_INT_ARGB);
-        Graphics2D osg = i.createGraphics();
-        osg.drawImage(ii, 0, 0, null);
-        h = i.getHeight();
-        w = i.getWidth();
-        tex = i.getRGB(0, 0, w, h, null, 0, w);
+    	System.out.println("TexMap (2pram) =" + fileName);
+    	Drawable d = AndroidResourceIndex.getDrawable(fileName);
+    	if(d == null)throw new NitrogenCreationException("TexMap resource " + fileName + " could not be found");
+    	Bitmap bitmap = ((BitmapDrawable) d).getBitmap();
+        h = bitmap.getWidth();
+        w = bitmap.getHeight();
+        tex = new int[h*w];
+ //       bitmap.getPixels(pixels, offset, stride, x, y, width, height);
+        bitmap.getPixels(tex, 0, w, 0, 0, w, h);
         
         // In order to refer to (jar file) resources instead of files 
         // (for live environment)ensure we write the file string in unix, 
         // without the file path that ContentGenerator adds to the start
         resourceName = toUnix(filex);   
     }
+    */
+
     
     private TexMap(String st) throws NitrogenCreationException
     { 	
-    	URL url = getClass().getResource(st);
-        if(url == null)throw new NitrogenCreationException("TexMap resource " + st + " could not be found");
-    	Image ii = new javax.swing.ImageIcon(getClass().getResource(st)).getImage();
-        BufferedImage i = new BufferedImage(ii.getWidth(null),ii.getHeight(null),BufferedImage.TYPE_INT_ARGB);
-        Graphics2D osg = i.createGraphics();
-        osg.drawImage(ii, 0, 0, null);
-        h = i.getHeight();
-        w = i.getWidth();
-        tex = i.getRGB(0, 0, w, h, null, 0, w);
-        resourceName = st;   
+    	String fileName = st;
+    	System.out.println("TexMap (2pram) =" + fileName);
+    	Drawable d = AndroidResourceIndex.getDrawable(fileName);
+    	if(d == null)throw new NitrogenCreationException("TexMap resource " + fileName + " could not be found");
+    	Bitmap bitmap = ((BitmapDrawable) d).getBitmap();
+        h = bitmap.getWidth();
+        w = bitmap.getHeight();
+        tex = new int[h*w];
+ //       bitmap.getPixels(pixels, offset, stride, x, y, width, height);
+        bitmap.getPixels(tex, 0, w, 0, 0, w, h);
+        
+        // In order to refer to (jar file) resources instead of files 
+        // (for live environment)ensure we write the file string in unix, 
+        // without the file path that ContentGenerator adds to the start
+        resourceName = toUnix(st);   
     }
     
     final int getRGB(int x, int y)
@@ -99,7 +112,7 @@ public class TexMap implements Serializable{
         return h;
     }
     
-
+    /*
     final private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException
     {
     	in.defaultReadObject();
@@ -122,6 +135,7 @@ public class TexMap implements Serializable{
         tex = i.getRGB(0, 0, w, h, null, 0, w);
         textures.put(resourceName, this);
     }
+    */
     
     /** Purges the collection of loaded textures, All SharedImmutableSubItems that use textures must be reloaded */ 
     final public void purgeTextures()

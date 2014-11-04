@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-package com.example.android.lunarlander;
+package com.bombheadgames.dogrunandroid;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
@@ -50,6 +51,7 @@ import com.bombheadgames.nitrogen2.Transform;
  * ship, and does an invalidate() to prompt another draw() as soon as possible
  * by the system.
  */
+@SuppressLint("HandlerLeak")
 class LunarView extends SurfaceView implements SurfaceHolder.Callback {
     public Handler mHandler;
 

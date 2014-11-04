@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-package com.example.android.lunarlander;
+package com.bombheadgames.dogrunandroid;
 
-import android.R;
 import android.app.Activity;
+import android.content.res.Resources;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -25,7 +25,7 @@ import android.view.MenuItem;
 import android.view.Window;
 import android.widget.TextView;
 
-import com.example.android.lunarlander.LunarView.LunarThread;
+import com.bombheadgames.dogrunandroid.LunarThread;
 
 /**
  * This is a simple LunarLander activity that houses a single LunarView. It
@@ -56,6 +56,9 @@ public class LunarLander extends Activity {
 
     /** A handle to the View in which the game is running. */
     private LunarView mLunarView;
+    
+    /** static reference to this instance used to access resources */
+    private static Resources resources;
 
     /**
      * Invoked during init to give the Activity a chance to set up its Menu.
@@ -74,7 +77,6 @@ public class LunarLander extends Activity {
         menu.add(0, MENU_EASY, 0, R.string.menu_easy);
         menu.add(0, MENU_MEDIUM, 0, R.string.menu_medium);
         menu.add(0, MENU_HARD, 0, R.string.menu_hard);
-
         return true;
     }
 
@@ -129,6 +131,7 @@ public class LunarLander extends Activity {
         setContentView(R.layout.lunar_layout);
 
         // get handles to the LunarView from XML, and its LunarThread
+        resources = getResources();
         mLunarView = (LunarView) findViewById(R.id.lunar);
         mLunarThread = mLunarView.getThread();
 
@@ -167,5 +170,10 @@ public class LunarLander extends Activity {
         super.onSaveInstanceState(outState);
         mLunarThread.saveState(outState);
         Log.w(this.getClass().getName(), "SIS called");
+    }
+    
+    public static Resources getTheResources()
+    {
+    	return resources;
     }
 }
