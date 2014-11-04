@@ -13,6 +13,8 @@ import java.util.Scanner;
 import java.util.Map;
 import java.util.HashMap;
 
+import android.content.Context;
+
 /** In Nitrogen this contains the immutable component data of an Item allowing
  * it to be shared with other Items that are identical 
  * apart from their location, orientation and visibility. In the ContentGenerator this
@@ -143,7 +145,7 @@ public class SharedImmutableSubItem implements Serializable{
 	 * @param filename The name of text file used to initialise the SharedImmutableSubItem
 	 * */
 	
-	public SharedImmutableSubItem(final String filename) throws NitrogenCreationException{
+	public SharedImmutableSubItem(final String filename, Context context) throws NitrogenCreationException{
 		
         Scanner in = null;
         
@@ -235,7 +237,7 @@ public class SharedImmutableSubItem implements Serializable{
     			textureMapResource = readLine(in, "unable to find textureMap " + textureMapName + " resource name loading " + filename);
     			
     			try{
-    				newTextureMap = TexMap.getTexture(textureMapResource);
+    				newTextureMap = TexMap.getTexture(textureMapResource, context);
   //  				textureMapMap.put(textureMapName, newTextureMap);
     			}
     			catch(NitrogenCreationException e){
@@ -536,7 +538,7 @@ public class SharedImmutableSubItem implements Serializable{
 		do{
 			if(in.hasNextLine()){retval = in.nextLine();}
 			else throw new NitrogenCreationException(exceptionText);
-		}while(retval.isEmpty());
+		}while(retval.length() > 0);
 		return retval;	
 	}
 

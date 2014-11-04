@@ -554,6 +554,7 @@ public class Renderer_Quake implements Renderer, Serializable{
 					if(pixelZ > contextZBuffer[index])
 					{
 						contextZBuffer[index] = pixelZ;
+						if(tex == null)System.out.println("FUCK NO TEXTURE");
 						int texPix = tex[(quakeStartTY >> TEXTURE_SHIFT) * textureWidth + (quakeStartTX >> TEXTURE_SHIFT)];
 						contextPixels[index] = texPix;
 					}

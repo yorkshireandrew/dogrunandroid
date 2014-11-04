@@ -55,8 +55,6 @@ import com.bombheadgames.nitrogen2.Transform;
 class LunarView extends SurfaceView implements SurfaceHolder.Callback {
     public Handler mHandler;
 
-
-
     /** Handle to the application context, used to e.g. fetch Drawables. */
     Context mContext;
 

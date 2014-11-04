@@ -6,6 +6,7 @@ import java.io.ObjectInputStream;
 
 
 
+
 import android.content.Context;
 //import Applet.ActionEvent;
 //import Applet.ActionListener;
@@ -22,6 +23,8 @@ import android.view.KeyEvent;
 import android.view.SurfaceHolder;
 
 
+
+import com.bombheadgames.nitrogen2.AndroidResourceIndex;
 //imports from treerun applet
 import com.bombheadgames.nitrogen2.Item;
 import com.bombheadgames.nitrogen2.ItemFactory_Default;
@@ -29,7 +32,7 @@ import com.bombheadgames.nitrogen2.NitrogenContext;
 import com.bombheadgames.nitrogen2.SharedImmutableSubItem;
 import com.bombheadgames.nitrogen2.Transform;
 
-	class LunarThread extends Thread implements AnimationTimerListener{
+	public class LunarThread extends Thread implements AnimationTimerListener{
 		private static final int LEAN_RATE = 450;
 		
         private static final int STATE_RUNNING = 1;
@@ -132,7 +135,7 @@ import com.bombheadgames.nitrogen2.Transform;
 
         /** Indicate whether the surface has been created & is ready to draw */
         private boolean mRun = false;
-		private Context mContext;
+		private static Context mContext; // hack so TexMap can acquire resources
 		private int mRotating = 0;
 		private int mRotation = 0;
 
@@ -147,13 +150,8 @@ import com.bombheadgames.nitrogen2.Transform;
             lunarview.mContext = context;
             this.mContext = context;
 
-            Resources res = context.getResources();
             // cache handles to our key sprites & other drawables
-            // mLanderImage = context.getResources().getDrawable(R.drawable.lander_plain);
-       
-            //******************* Treerun stuff **********************
-        	//dogslantSlider = new JSlider();
- //           nitrogenContext = new NitrogenContext(300,300,1f,1f,0.05f,50000); 	
+            // mLanderImage = context.getResources().getDrawable(R.drawable.lander_plain);	
             average = 0;
             maximum = 0;
             averageCount = 0;
@@ -167,22 +165,14 @@ import com.bombheadgames.nitrogen2.Transform;
       	   	setName("Tree Run");
       	   	
       	   	// DONT PUT THESE IN THE CONSTRUCTOR
-      	    System.out.println("image:" + getClass().getResource("/res/Trunk.PNG"));
+//      	    System.out.println("image:" + getClass().getResource("/res/Trunk.PNG"));
 //      	   	System.out.println("documentbase:" + getDocumentBase());
 //      	   	System.out.println("codebase:" + getCodeBase());
       	    //crashes[0] = getAudioClip(getClass().getResource("/res/crash1.wav"));
-      	    //crashes[1] = getAudioClip(getClass().getResource("/res/crash2.wav"));
-      	    //crashes[2] = getAudioClip(getClass().getResource("/res/crash3.wav"));
-      	    //crashes[3] = getAudioClip(getClass().getResource("/res/crash4.wav"));
+      	    
       	    crashes = new MediaPlayer[4];
  //           crashes[0] = MediaPlayer.create(mContext, com.bombhead.spaceinvaders2.R.raw.crash1.wav);
-//            crashes[0] = MediaPlayer.create(mContext, R.raw.crash1);
-//            crashes[1] = MediaPlayer.create(mContext, R.raw.crash2);
-//            crashes[2] = MediaPlayer.create(mContext, R.raw.crash3);
-//            crashes[3] = MediaPlayer.create(mContext, R.raw.crash4);
-
       	    
-      	   	
       	   	root = new Transform(
       			null,
       			1f, 0f, 0f, 0f,
@@ -342,8 +332,10 @@ import com.bombheadgames.nitrogen2.Transform;
         private SharedImmutableSubItem loadSISI(String resource) throws Exception
         {
         	ObjectInputStream source = null;
-        	try{ 				
-        		source = new ObjectInputStream(this.getClass().getResourceAsStream(resource));
+        	try{
+        		System.out.println("loadSISI resource:" + resource);
+        		
+        		source = new ObjectInputStream(AndroidResourceIndex.getInputStream(resource, mContext));
         		return ((SharedImmutableSubItem) source.readObject());
         	}
         	catch (FileNotFoundException e) {
@@ -434,10 +426,13 @@ import com.bombheadgames.nitrogen2.Transform;
                 try {
                     c = mSurfaceHolder.lockCanvas(null);
                     synchronized (mSurfaceHolder) {
-                        if (mMode == STATE_RUNNING) 
-                        	timer.process();
-                        doDraw(c);
-                        timer.pad();
+                    	if(timer != null)
+                    	{
+	                        if (mMode == STATE_RUNNING) 
+	                        	timer.process();
+	                        doDraw(c);
+	                        timer.pad();
+                    	}
                     }
                 } finally {
                     // do this in a finally so that if an exception is thrown
@@ -718,5 +713,10 @@ import com.bombheadgames.nitrogen2.Transform;
     	public void setDifficulty(final int difficulty)
     	{
     		hardness  = difficulty;
+    	}
+    	
+    	public static Context getContext()
+    	{
+    		return mContext;
     	}
     }

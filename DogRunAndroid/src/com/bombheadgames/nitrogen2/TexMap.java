@@ -23,9 +23,12 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.BitmapDrawable;
+
+import com.bombheadgames.dogrunandroid.LunarThread;
 
 public class TexMap implements Serializable{
 	private static final long serialVersionUID = 3915774142992302906L;
@@ -40,13 +43,13 @@ public class TexMap implements Serializable{
     
     TexMap(){}
     
-    final static TexMap getTexture(String st) throws NitrogenCreationException
+    final static TexMap getTexture(String st, Context context) throws NitrogenCreationException
     {
     	if(textures.containsKey(st))
     	{
     		return(textures.get(st));
     	}
-    	return(new TexMap(st));
+    	return(new TexMap(st, context));
     }
 
 
@@ -73,11 +76,11 @@ public class TexMap implements Serializable{
     */
 
     
-    private TexMap(String st) throws NitrogenCreationException
+    private TexMap(String st, Context context) throws NitrogenCreationException
     { 	
     	String fileName = st;
     	System.out.println("TexMap (2pram) =" + fileName);
-    	Drawable d = AndroidResourceIndex.getDrawable(fileName);
+    	Drawable d = AndroidResourceIndex.getDrawable(fileName, context);
     	if(d == null)throw new NitrogenCreationException("TexMap resource " + fileName + " could not be found");
     	Bitmap bitmap = ((BitmapDrawable) d).getBitmap();
         h = bitmap.getWidth();
@@ -111,8 +114,7 @@ public class TexMap implements Serializable{
     {
         return h;
     }
-    
-    /*
+      
     final private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException
     {
     	in.defaultReadObject();
@@ -124,18 +126,29 @@ public class TexMap implements Serializable{
        			w = loadedTexture.w;
        		    return; // we already have loaded the texture
     		}
-    	URL url = getClass().getResource(resourceName);
-        if(url == null)throw new IOException("TexMap resource " + resourceName + " could not be found");
-    	Image ii = new javax.swing.ImageIcon(getClass().getResource(resourceName)).getImage();
-        BufferedImage i = new BufferedImage(ii.getWidth(null),ii.getHeight(null),BufferedImage.TYPE_INT_ARGB);
-        Graphics2D osg = i.createGraphics();
-        osg.drawImage(ii, 0, 0, null);
-        h = i.getHeight();
-        w = i.getWidth();
-        tex = i.getRGB(0, 0, w, h, null, 0, w);
+//    	URL url = getClass().getResource(resourceName);
+    	System.out.println("TRYING TO LOAD TexMap url:" + resourceName);
+    	Context context = LunarThread.getContext();
+    	if(context == null)System.out.println("OH NO NO CONTEXT!");
+    	Drawable d = AndroidResourceIndex.getDrawable(resourceName, context);
+    	if(d == null)System.out.println("TexMap resource " + resourceName + " could not be found");
+    	Bitmap bitmap = ((BitmapDrawable) d).getBitmap();
+        w = bitmap.getWidth();
+        h = bitmap.getHeight();
+        tex = new int[h*w];
+        bitmap.getPixels(tex, 0, w, 0, 0, w, h);
+        resourceName = toUnix(resourceName);
+        System.out.println("" + resourceName + ":" + w + ":" + h);
+        
+        String blah = "";
+        for(int x = 0; x < w; x++)
+        {
+        	blah += Integer.toHexString(tex[x]) + ",";
+        }
+        System.out.println(blah);
+        
         textures.put(resourceName, this);
     }
-    */
     
     /** Purges the collection of loaded textures, All SharedImmutableSubItems that use textures must be reloaded */ 
     final public void purgeTextures()

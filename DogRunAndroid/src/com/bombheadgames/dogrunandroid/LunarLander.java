@@ -132,6 +132,7 @@ public class LunarLander extends Activity {
 
         // get handles to the LunarView from XML, and its LunarThread
         resources = getResources();
+        System.out.println("*** LunerLander.onCreate got resources " + resources);
         mLunarView = (LunarView) findViewById(R.id.lunar);
         mLunarThread = mLunarView.getThread();
 
@@ -174,6 +175,7 @@ public class LunarLander extends Activity {
     
     public static Resources getTheResources()
     {
+    	System.out.println("LunarLander getTheResources returning" + resources);
     	return resources;
     }
 }

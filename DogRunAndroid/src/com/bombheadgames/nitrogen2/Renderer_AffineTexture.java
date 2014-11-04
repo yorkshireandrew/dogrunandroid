@@ -332,6 +332,11 @@ private final void renderLine(
 		// ***************** RENDER PIXEL ****************
 		int pixelZ = (int)(bigLeftSZ >> ZSHIFT);
 		int index = indexOffset + lineStart;
+		// DEBUGGING
+		if (index > contextZBuffer.length)
+		{
+			System.out.println("indexOffset:" + indexOffset + "LineStart: " + lineStart + " Len:" + contextZBuffer.length);
+		}
 		
 		if(pixelZ > contextZBuffer[index])
 		{
